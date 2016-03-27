@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="binaries">
+    <CLASSES>
+      <root url="file://$USER_HOME$/Downloads/drools-distribution-6.3.0.Final/binaries" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://$USER_HOME$/Downloads/drools-distribution-6.3.0.Final/binaries" recursive="false" />
+  </library>
+</component>

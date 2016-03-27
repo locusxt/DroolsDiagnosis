@@ -1,0 +1,158 @@
+package rules;
+dialect  "mvel"
+
+declare Disease
+end
+
+declare Respiratory extends Disease
+end
+
+declare UpperRespiratory extends Respiratory
+end
+
+declare CommonCold extends UpperRespiratory
+    duration_ : int
+    have_cough : boolean
+end
+
+declare Pharyngitis extends UpperRespiratory
+end
+
+declare Pneumonia extends Respiratory
+end
+
+declare Bravery extends Disease
+end
+
+declare Cholecystalgia extends Bravery
+end
+
+declare Cholecystitis extends Bravery
+end
+
+declare Symptom
+end
+
+declare Ache extends Symptom
+    position : String
+    duration_ : int
+end
+
+declare Jaundice  extends Symptom
+end
+
+declare Fever extends Symptom
+end
+
+declare Medicine
+end
+
+declare Examination
+end
+
+declare LFTs extends Examination
+    state : String
+end
+
+declare Bilirubin extends Examination
+    state : String
+end
+
+declare Lipase extends Examination
+    state : String
+end
+
+declare UltrasonicInspection extends Examination
+    position : String
+    result_ : String
+end
+
+declare NuclearBiliaryPhotography extends Examination
+    result_ : String
+end
+
+declare State
+    id : int
+    text : String
+end
+
+rule "-1->-2"
+when
+s: State(id == -1)
+Ache(position == "venter superior")
+then
+modify(s){id = -2, text = "需要体温、LFTs、胆红素、脂肪酶检查"};
+end
+
+//
+rule "-2->-3"
+when
+s: State(id == -2)
+Ache(position == "venter superior", duration_ < 7)
+not (Jaundice())
+not (Fever())
+LFTs(state == "Normal")
+Lipase(state == "Normal")
+then
+modify(s){id = -3, text = "考虑胆绞痛，需要右上腹超声进一步检查"};
+end
+
+//
+rule "-3->-4"
+when
+s: State(id == -3)
+UltrasonicInspection(result_ == "positive")
+then
+modify(s){id = -4, text = "结论：胆绞痛"};
+end
+
+//
+rule "-2->-5"
+when
+s: State(id == -2)
+Ache(position == "venter superior", duration_ >= 7)
+LFTs(state == "Normal")
+Lipase(state == "Normal")
+then
+modify(s){id = -5, text = "考虑胆囊炎，需要右上腹超声进一步检查"};
+end
+
+//
+rule "-5->-6"
+when
+s: State(id == -5)
+UltrasonicInspection(position=="right upper quadrant", result_=="DU")
+then
+modify(s){id = -6, text = "需要核医学胆道摄影"};
+end
+
+//
+rule "-5->-7"
+when
+s: State(id == -5)
+UltrasonicInspection(position=="right upper quadrant", result_ =="gall stone" )
+then
+modify(s){id = -7, text = "结论：胆囊炎"};
+end
+
+//
+rule "-6->-7"
+when
+s: State(id == -6)
+NuclearBiliaryPhotography(result_ == "absent of biliary tract sign")
+then
+modify(s){id = -7, text = "结论：胆囊炎"};
+end
+
+//
+rule "-2->-8"
+when
+s: State(id == -2)
+Ache(position == "venter superior", duration_ >= 7)
+LFTs(state == "Up")
+Lipase(state == "Up")
+then
+modify(s){id = -8, text = "考虑胆总管结石和反流性胆管炎，若脂肪酶升高考虑胰腺炎。考虑行US、EUS、MRCP或ERCP"};
+end
+
+//
