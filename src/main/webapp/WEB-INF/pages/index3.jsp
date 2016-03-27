@@ -61,8 +61,16 @@
         };
         // zTree 的数据属性，深入使用请参考 API 文档（zTreeNode 节点数据详解）
         var zNodes = [
-            {"id":1,"pId":0,"name":"root"}
-            ,{"id":112,"pId":1,"name":"Disease"},{"id":116,"pId":112,"name":"Respiratory"},{"id":117,"pId":116,"name":"UpperRespiratory"},{"id":118,"pId":117,"name":"CommonCold"},{"id":119,"pId":117,"name":"Pharyngitis"},{"id":120,"pId":116,"name":"Pneumonia"},{"id":157,"pId":112,"name":"Bravery"},{"id":158,"pId":157,"name":"Cholecystalgia"},{"id":159,"pId":157,"name":"Cholecystitis"},{"id":113,"pId":1,"name":"Symptom"},{"id":151,"pId":113,"name":"Ache"},{"id":152,"pId":113,"name":"Jaundice "},{"id":153,"pId":113,"name":"Fever"},{"id":114,"pId":1,"name":"Medicine"},{"id":115,"pId":1,"name":"Examination"},{"id":154,"pId":115,"name":"LFTs"},{"id":155,"pId":115,"name":"Bilirubin"},{"id":156,"pId":115,"name":"Lipase"},{"id":161,"pId":115,"name":"UltrasonicInspection"},{"id":163,"pId":115,"name":"NuclearBiliaryPhotography"},{"id":2,"pId":0,"name":"other"},{"id":3,"pId":2,"name":"State"}
+            {"id":1,"pId":0,"name":"root"},{"id":112,"pId":1,"name":"疾病"},{"id":116,"pId":112,"name":"呼吸道"},
+            {"id":117,"pId":116,"name":"上呼吸道"},{"id":118,"pId":117,"name":"普通感冒"},{"id":119,"pId":117,"name":"咽炎"},
+            {"id":120,"pId":116,"name":"肺炎"},{"id":157,"pId":112,"name":"胆"},{"id":158,"pId":157,"name":"胆绞痛"},
+            {"id":159,"pId":157,"name":"胆囊炎"},{"id":113,"pId":1,"name":"症状"},{"id":151,"pId":113,"name":"疼痛"},
+            {"id":152,"pId":113,"name":"黄疸"},{"id":153,"pId":113,"name":"发烧"},{"id":114,"pId":1,"name":"药物"},
+            {"id":115,"pId":1,"name":"检查"},{"id":154,"pId":115,"name":"LFTs"},{"id":155,"pId":115,"name":"胆红素检查"},
+            {"id":156,"pId":115,"name":"脂肪酶检查"},{"id":161,"pId":115,"name":"超声波检查"},{"id":163,"pId":115,"name":"核医学检查"},
+            {"id":2,"pId":0,"name":"其他"},{"id":3,"pId":2,"name":"State"}
+//            {"id":1,"pId":0,"name":"root"}
+//            ,{"id":112,"pId":1,"name":"Disease"},{"id":116,"pId":112,"name":"Respiratory"},{"id":117,"pId":116,"name":"UpperRespiratory"},{"id":118,"pId":117,"name":"CommonCold"},{"id":119,"pId":117,"name":"Pharyngitis"},{"id":120,"pId":116,"name":"Pneumonia"},{"id":157,"pId":112,"name":"Bravery"},{"id":158,"pId":157,"name":"Cholecystalgia"},{"id":159,"pId":157,"name":"Cholecystitis"},{"id":113,"pId":1,"name":"Symptom"},{"id":151,"pId":113,"name":"Ache"},{"id":152,"pId":113,"name":"Jaundice "},{"id":153,"pId":113,"name":"Fever"},{"id":114,"pId":1,"name":"Medicine"},{"id":115,"pId":1,"name":"Examination"},{"id":154,"pId":115,"name":"LFTs"},{"id":155,"pId":115,"name":"Bilirubin"},{"id":156,"pId":115,"name":"Lipase"},{"id":161,"pId":115,"name":"UltrasonicInspection"},{"id":163,"pId":115,"name":"NuclearBiliaryPhotography"},{"id":2,"pId":0,"name":"other"},{"id":3,"pId":2,"name":"State"}
         ];
         $(document).ready(function(){
             zTreeObj = $.fn.zTree.init($("#treeDemo"), setting, zNodes);
@@ -70,12 +78,21 @@
             treeObj.expandAll(true);
         });
 
+        cur_lang = "cn";
+        var nodeName =
+        {"0":{"en":""},"1":{"en":"root"},"2":{"en":"other"},"3":{"en":"State"},"112":{"en":"Disease"},
+            "113":{"en":"Symptom"},"114":{"en":"Medicine"},"115":{"en":"Examination"},"116":{"en":"Respiratory"},
+            "117":{"en":"UpperRespiratory"},"118":{"en":"CommonCold"},"119":{"en":"Pharyngitis"},"120":{"en":"Pneumonia"},
+            "151":{"en":"Ache"},"152":{"en":"Jaundice"},"153":{"en":"Fever"},"154":{"en":"LFTs"},"155":{"en":"Bilirubin"},
+            "156":{"en":"Lipase"},"157":{"en":"Bravery"},"158":{"en":"Cholecystalgia"},"159":{"en":"Cholecystitis"},
+            "161":{"en":"UltrasonicInspection"},"163":{"en":"NuclearBiliaryPhotography"}}; //多语言支持 {id:{en:ename, cn:cname}}
+
 
         var curMax = 170;
         var curNodeId = -1;
         var curNodePid = -1;
-        var nodeProperty ={}
-//        {"2":{},"3":{"id":"int","text":"String"},"112":{},"113":{},"114":{},"115":{},"116":{},"117":{},"118":{"duration_":"int","have_cough":"boolean"},"119":{},"120":{},"151":{"position":"String","duration_":"int"},"152":{},"153":{},"154":{"state":"String"},"155":{"state":"String"},"156":{"state":"String"},"157":{},"158":{},"159":{},"160":{},"161":{"result_":"String", "position":"String"},"162":{},"163":{"result_":"String"}};
+        var nodeProperty =
+        {"2":{},"3":{"id":"int","text":"String"},"112":{},"113":{},"114":{},"115":{},"116":{},"117":{},"118":{"duration_":"int","have_cough":"boolean"},"119":{},"120":{},"151":{"position":"String","duration_":"int"},"152":{},"153":{},"154":{"state":"String"},"155":{"state":"String"},"156":{"state":"String"},"157":{},"158":{},"159":{},"160":{},"161":{"result_":"String", "position":"String"},"162":{},"163":{"result_":"String"}};
         function requestNewId(){
             curMax += 1;
             return curMax;
@@ -100,6 +117,11 @@
             $("#addBtn_"+treeNode.tId).unbind().remove();
         };
 
+        function update_en_name(){
+            nodeName[curNodeId]["en"] = $("#en_name").val();
+            updateDeclare();
+        }
+
         function zTreeOnClick(event, treeId, treeNode) {
 //            alert(treeNode.tId + ", " + treeNode.name);
             console.log(treeNode);
@@ -107,6 +129,9 @@
             curNodePid = treeNode.pId;
             $('#node_name').html(treeNode.id + ", " + treeNode.name);
             if (!(curNodeId in nodeProperty)) nodeProperty[curNodeId] = {};
+            if (!(curNodeId in nodeName)) {nodeName[curNodeId] = {"en":""};}
+            $("#en_name").val(nodeName[curNodeId]["en"]);
+
             updatePropertyTable();
         };
 
@@ -135,7 +160,8 @@
                 if (n["id"] == curNodeId && $("#property_name").val() != "" && $("#property_type").val() != ""){
                     if (dectectType($("#property_type").val()) == false)
                             return false;
-                    if (!(n["id"] in nodeProperty)) {nodeProperty[n["id"]] = {};console.log("new");}
+                    if (!(n["id"] in nodeProperty)) {nodeProperty[n["id"]] = {};}
+//                    if (!(n["id"] in nodeName)) {nodeName[n["id"]] = {};}
                     nodeProperty[n["id"]][$("#property_name").val()] = $("#property_type").val();
 //                    treeObj.updateNode(n);
                 }
@@ -164,7 +190,7 @@
             if ((curNodeId in nodeProperty)){
                 for (p in nodeProperty[curNodeId]){
                     str += "<tr><td>" + nodeProperty[curNodeId][p] + "</td> <td>" + p +
-                                    "</td> <td><span onclick=\"delProperty('" + p + "')\">delete</span></td></tr>";
+                                    "</td> <td><button type='button' onclick=\"delProperty('" + p + "')\">删除</button></td></tr>";
                 }
             }
             console.log(str);
@@ -185,15 +211,13 @@
                 for (i = 0; i < nodes.length; ++i) {
                     n = nodes[i];
                     if (n["id"] == targetId) {
-                        targetName = n["name"];
+                        targetName = nodeName[targetId]["en"];
                         targetPId = n["pId"];
                     }
                 }
-                for (i = 0; i < nodes.length; ++i) {
-                    n = nodes[i];
-                    if (n["id"] == targetPId) targetPName = n["name"];
-                }
-                if (targetName == "" || targetPName == "") str = "error";
+                if (!(targetPId in nodeName)) nodeName[targetPId] = {"en":""};
+                targetPName = nodeName[targetPId]["en"];
+                if (targetName == "" || targetPName == "") str = "错误:缺少当前节点或者父节点英文名称";
                 else {
                     str = "declare " + targetName;
                     if (targetPName != "root" && targetPName != "other") str += " extends " + targetPName;
@@ -204,6 +228,32 @@
                     str += "end\n";
                 }
             }
+//            if (targetId in nodeProperty) {
+//                var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
+//                var nodes = treeObj.transformToArray(treeObj.getNodes());
+//                targetPId = -1;
+//                for (i = 0; i < nodes.length; ++i) {
+//                    n = nodes[i];
+//                    if (n["id"] == targetId) {
+//                        targetName = n["name"];
+//                        targetPId = n["pId"];
+//                    }
+//                }
+//                for (i = 0; i < nodes.length; ++i) {
+//                    n = nodes[i];
+//                    if (n["id"] == targetPId) targetPName = n["name"];
+//                }
+//                if (targetName == "" || targetPName == "") str = "error";
+//                else {
+//                    str = "declare " + targetName;
+//                    if (targetPName != "root" && targetPName != "other") str += " extends " + targetPName;
+//                    str += "\n";
+//                    for (p in nodeProperty[targetId]) {
+//                        str += "    " + p + " : " + nodeProperty[targetId][p] + "\n";
+//                    }
+//                    str += "end\n";
+//                }
+//            }
             return str;
         }
 
@@ -287,9 +337,10 @@
     </div>
     <div class="col-sm-7">
         <div>
-            <div><span id="node_name">Node Name</span></div>
+            <div><span id="node_name">节点名称</span></div>
+            <div>英文名称:<input onchange="update_en_name();" type="text" id="en_name" placeholder="英文名称" /></div>
             <div>
-                <input id="property_type" list="property_type_input" placeholder="property type" />
+                <input id="property_type" list="property_type_input" placeholder="属性类型" />
 
                 <datalist id="property_type_input">
                     <option>int</option>
@@ -299,15 +350,15 @@
                     <option>enum</option>
                 </datalist>
 
-                <input type="text" id="property_name" placeholder="property name" />
+                <input type="text" id="property_name" placeholder="属性名称" />
 
-                <button type="button" onclick="addNewProperty();">New Property</button>
+                <button type="button" onclick="addNewProperty();">新建</button>
             </div>
         </div>
         <table id="property_tbl" class="table table-striped table-bordered">
 
         </table>
-        <div><span onclick="$('#declare_area').toggle();">toggle declare</span></div>
+        <div><span onclick="$('#declare_area').toggle();">toggle</span></div>
         <div >
             <pre id="declare_area">
 
