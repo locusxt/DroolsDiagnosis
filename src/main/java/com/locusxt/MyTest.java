@@ -31,7 +31,7 @@ public class MyTest {
             FactType acheType = kbase.getFactType("rules", "Ache");
             Object ache = acheType.newInstance();
             acheType.set(ache, "position", "venter superior");
-            acheType.set(ache, "duration_", 10);
+            acheType.set(ache, "duration_", 2);
 
             FactType lftType = kbase.getFactType("rules", "LFTs");
             Object lfts = lftType.newInstance();
@@ -45,7 +45,9 @@ public class MyTest {
             Object ui = uiType.newInstance();
             uiType.set(ui, "result_", "positive");
 
-
+            FactType reasonChainType = kbase.getFactType( "rules", "ReasonChain" );
+            Object rchain = reasonChainType.newInstance();
+            reasonChainType.set(rchain, "text", "Start\n");
 //            Message message = new Message();
 //            message.setMessage("Hello World");
 //            message.setStatus(Message.HELLO);
@@ -53,8 +55,11 @@ public class MyTest {
             kSession.insert(ache);
             kSession.insert(lfts);kSession.insert(lips);
             kSession.insert(ui);
+            kSession.insert(rchain);
             kSession.fireAllRules();
             System.out.println("end " + stateType.get(sta, "text"));
+            System.out.println("=========Reasoning Chain==============");
+            System.out.println(reasonChainType.get(rchain, "text") + "End");
         } catch (Throwable t) {
             t.printStackTrace();
         }
