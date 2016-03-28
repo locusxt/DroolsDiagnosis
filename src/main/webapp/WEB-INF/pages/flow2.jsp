@@ -439,7 +439,7 @@
                 if(_cur_count == _last_count) break;
                 _last_count = _cur_count;
             }
-            if(_cur_count < nodes.length) str += "存在开始节点无法到达的节点";
+            if(_cur_count < nodes.length) str += "存在开始节点无法到达的节点<br />";
 //            console.log("count:" + _cur_count);
 
             link_map = {}
@@ -475,7 +475,7 @@
                 if(_cur_count == _last_count) break;
                 _last_count = _cur_count;
             }
-            if(_cur_count < nodes.length) str += "存在无法到达结束节点的节点";
+            if(_cur_count < nodes.length) str += "存在无法到达结束节点的节点<br />";
 
             $('#check_info').html(str);
 
