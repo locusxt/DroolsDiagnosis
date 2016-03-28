@@ -370,6 +370,116 @@
             console.log(totalRules);
         }
 
+        function check_flow_chart(){
+            myjson = myDiagram.model.toJson();
+            myjson = eval("(" + myjson + ")");
+            links = myjson["linkDataArray"];
+            nodes = myjson["nodeDataArray"];
+
+            //检查唯一开始结束节点
+            start_count = 0;
+            end_count = 0;
+            start_tid = -1;
+            end_tid = -1;
+            str = "";
+            for (t = 0; t < nodes.length; ++t){
+                if ("category" in nodes[t]){
+                    if (nodes[t]["category"] == "Start") {
+                        start_count += 1;
+                        start_tid = nodes[t]["key"];
+                    }
+                    else if(nodes[t]["category"] == "End") {
+                        end_count += 1;
+                        end_tid = nodes[t]["key"];
+                    }
+                }
+            }
+            if (start_count == 0) str += "缺少开始节点\n";
+            else if(start_count > 1) str += "发现多余的开始节点\n";
+            if (end_count == 0) str += "缺少结束节点\n";
+            else if(end_count > 1) str += "发现多余的结束节点\n";
+
+            if (str != ""){
+                $('#check_info').html(str);
+                return;
+            }
+
+            //检查没有断头链
+//            find_num = 0;
+            link_map = {}
+            for (t = 0; t < links.length; ++t){
+                li = links[t];
+//                console.log(li);
+                fromid = li["from"];
+                toid = li["to"];
+                cond = li["cond"];
+                docs = li["doc"];
+                if (!(fromid in link_map)){
+                    link_map[fromid] = {};
+                }
+                link_map[fromid][toid] = 1;
+            }
+            connect_map = {};
+            visit_map = {start_tid:1};
+            connect_map[start_tid] = 1;
+            _cur_count = 0;
+            _last_count = 0;
+            while(true){
+                for (k in connect_map){
+                    delete connect_map[k];
+                    if (k in visit_map) continue;
+                    visit_map[k] = 1;
+                    _cur_count += 1;
+                    if (k in link_map){
+                        for (k2 in link_map[k]){
+                            connect_map[k2] = 1;
+                        }
+                    }
+                }
+                if(_cur_count == _last_count) break;
+                _last_count = _cur_count;
+            }
+            if(_cur_count < nodes.length) str += "存在开始节点无法到达的节点";
+//            console.log("count:" + _cur_count);
+
+            link_map = {}
+            for (t = 0; t < links.length; ++t){
+                li = links[t];
+//                console.log(li);
+                toid = li["from"];
+                fromid = li["to"];
+                cond = li["cond"];
+                docs = li["doc"];
+                if (!(fromid in link_map)){
+                    link_map[fromid] = {};
+                }
+                link_map[fromid][toid] = 1;
+            }
+            connect_map = {};
+            visit_map = {end_tid:1};
+            connect_map[end_tid] = 1;
+            _cur_count = 0;
+            _last_count = 0;
+            while(true){
+                for (k in connect_map){
+                    delete connect_map[k];
+                    if (k in visit_map) continue;
+                    visit_map[k] = 1;
+                    _cur_count += 1;
+                    if (k in link_map){
+                        for (k2 in link_map[k]){
+                            connect_map[k2] = 1;
+                        }
+                    }
+                }
+                if(_cur_count == _last_count) break;
+                _last_count = _cur_count;
+            }
+            if(_cur_count < nodes.length) str += "存在无法到达结束节点的节点";
+
+            $('#check_info').html(str);
+
+        }
 
     </script>
 
@@ -381,7 +491,7 @@
       <div id="myPalette" style="border: solid 1px gray; height: 720px"></div>
     </span>
     <span style="display: inline-block; vertical-align: top; padding: 5px; width:80%">
-      <div id="myDiagram" style="border: solid 1px gray; height: 720px"></div>
+      <div id="myDiagram" style="border: solid 1px gray; height: 720px" onmouseup="check_flow_chart();" onclick="check_flow_chart();" onkeyup="check_flow_chart();"></div>
     </span>
     </div>
     <%--<p>--%>
@@ -415,6 +525,9 @@
 
         </div>
     </div>
+    <div id="check_info" style="background:#FFB6C1">
+
+    </div>
     <button id="SaveButton" onclick="save()">Save</button>
     <button onclick="load()">Load</button>
     <button onclick="$('#mydata').toggle();">Toggle</button>
@@ -431,7 +544,8 @@
 {"text":"考虑胆囊炎，需要右上腹超声进一步检查", "key":-5, "loc":"138.109375 -385"},
 {"text":"需要核医学胆道摄影", "key":-6, "loc":"28.109375 -252"},
 {"text":"结论：胆囊炎", "key":-7, "loc":"235.109375 -149"},
-{"text":"考虑胆总管结石和反流性胆管炎，若脂肪酶升高考虑胰腺炎。\n考虑行US、EUS、MRCP或ERCP", "key":-8, "loc":"460.109375 -346"}
+{"text":"考虑胆总管结石和反流性胆管炎，若脂肪酶升高考虑胰腺炎。\n考虑行US、EUS、MRCP或ERCP", "key":-8, "loc":"460.109375 -346"},
+{"category":"End", "text":"End", "key":-9, "loc":"224.109375 -14"}
  ],
   "linkDataArray": [
 {"from":-1, "to":-2, "fromPort":"B", "toPort":"T", "points":[125.109375,-612.2266599078512,125.109375,-602.2266599078512,125.109375,-580.3010542581249,131.109375,-580.3010542581249,131.109375,-558.3754486083984,131.109375,-548.3754486083984], "cond":"Ache(position == \"venter superior\")", "text":"上腹痛"},
@@ -441,7 +555,10 @@
 {"from":-5, "to":-6, "fromPort":"L", "toPort":"T", "points":[56.30943298339844,-385,46.30943298339844,-385,28.109375,-385,28.109375,-331.71886215209963,28.109375,-278.4377243041992,28.109375,-268.4377243041992], "text":"未确诊", "cond":"UltrasonicInspection(position==\"right upper quadrant\", result_==\"DU\")"},
 {"from":-5, "to":-7, "fromPort":"R", "toPort":"T", "points":[219.90931701660156,-385,229.90931701660156,-385,235.109375,-385,235.109375,-280.21886215209963,235.109375,-175.4377243041992,235.109375,-165.4377243041992], "text":"胆结石伴胆囊壁增厚或水肿", "cond":"UltrasonicInspection(position==\"right upper quadrant\", result_ ==\"gall stone\" )"},
 {"from":-6, "to":-7, "fromPort":"B", "toPort":"L", "points":[28.109375,-235.56227569580076,28.109375,-225.56227569580076,28.109375,-149,100.36939239501953,-149,172.62940979003906,-149,182.62940979003906,-149], "text":"胆道无显影", "cond":"NuclearBiliaryPhotography(result_ == \"absent of  biliary tract sign\")"},
-{"from":-2, "to":-8, "fromPort":"R", "toPort":"T", "points":[215.2178192138672,-524,225.2178192138672,-524,460.109375,-524,460.109375,-464.09431076049805,460.109375,-404.1886215209961,460.109375,-394.1886215209961], "text":"持续性腹痛，可能出现发热，胆红素、脂肪酶或LFTs升高", "cond":"Ache(position == \"venter superior\", duration_ >= 7)\nLFTs(state == \"Up\")\nLipase(state == \"Up\")"}
+{"from":-2, "to":-8, "fromPort":"R", "toPort":"T", "points":[215.2178192138672,-524,225.2178192138672,-524,460.109375,-524,460.109375,-464.09431076049805,460.109375,-404.1886215209961,460.109375,-394.1886215209961], "text":"持续性腹痛，可能出现发热，胆红素、脂肪酶或LFTs升高", "cond":"Ache(position == \"venter superior\", duration_ >= 7)\nLFTs(state == \"Up\")\nLipase(state == \"Up\")"},
+{"from":-8, "to":-9, "fromPort":"B", "toPort":"R", "points":[460.109375,-297.8113784790039,460.109375,-287.8113784790039,460.109375,-14,357.42037844103436,-14,254.73138188206872,-14,244.73138188206872,-14]},
+{"from":-7, "to":-9, "fromPort":"B", "toPort":"T", "points":[235.109375,-132.56227569580076,235.109375,-122.56227569580076,235.109375,-83.59214128893474,224.109375,-83.59214128893474,224.109375,-44.622006882068725,224.109375,-34.622006882068725]},
+{"from":-4, "to":-9, "fromPort":"B", "toPort":"L", "points":[-175.890625,-230.56227569580076,-175.890625,-220.56227569580076,-175.890625,-14,8.798371558965641,-14,193.48736811793128,-14,203.48736811793128,-14]}
  ]}
   </textarea>
     </div>
