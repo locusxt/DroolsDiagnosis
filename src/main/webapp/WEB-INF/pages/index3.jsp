@@ -32,6 +32,12 @@
     <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
     <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="static/jquery.ztree.all.js"></script>
+    <style>
+        .table th, .table td {
+            text-align: center;
+            height:38px;
+        }
+    </style>
     <script>
 
 
@@ -91,6 +97,7 @@
         var curMax = 170;
         var curNodeId = -1;
         var curNodePid = -1;
+        //id : {name:{type:t, enum:[]}}
         var nodeProperty =
         {"2":{},"3":{"id":"int","text":"String"},"112":{},"113":{},"114":{},"115":{},"116":{},"117":{},"118":{"duration_":"int","have_cough":"boolean"},"119":{},"120":{},"151":{"position":"String","duration_":"int"},"152":{},"153":{},"154":{"state":"String"},"155":{"state":"String"},"156":{"state":"String"},"157":{},"158":{},"159":{},"160":{},"161":{"result_":"String", "position":"String"},"162":{},"163":{"result_":"String"}};
         function requestNewId(){
@@ -190,7 +197,7 @@
             if ((curNodeId in nodeProperty)){
                 for (p in nodeProperty[curNodeId]){
                     str += "<tr><td>" + nodeProperty[curNodeId][p] + "</td> <td>" + p +
-                                    "</td> <td><button type='button' onclick=\"delProperty('" + p + "')\">删除</button></td></tr>";
+                                    "</td> <td><button type='button' class='btn btn-primary' onclick=\"delProperty('" + p + "')\">删除</button></td></tr>";
                 }
             }
             console.log(str);
@@ -319,6 +326,60 @@
             tmp = JSON.stringify(res);
             return tmp;
         }
+
+        tmp_enum_list = [];
+        function add_enum_item(){
+            item_content = $('#enum_input').val();
+            if (item_content == ""){
+                alert('缺少内容');
+                return ;
+            }
+
+            p_type = $('#property_type').val();
+            p_name = $('#property_name').val();
+            if (p_type == "int"){
+                item2num = parseInt(item_content);
+                if (!isNaN(item2num)){
+                    if (tmp_enum_list.indexOf(item2num) != -1){alert('已存在');return ;}
+                    tmp_enum_list.push(item2num);
+                    tmp_enum_list.sort();
+                }
+                else{
+                    alert('输入内容不是int类型');
+                    return ;
+                }
+            }
+            else if (p_type == "float"){
+                item2num = parseFloat(item_content);
+                if (!isNaN(item2num)){
+                    if (tmp_enum_list.indexOf(item2num) != -1){alert('已存在');return ;}
+                    tmp_enum_list.push(item2num);
+                    tmp_enum_list.sort();
+                }
+                else{
+                    alert('输入内容不是float类型');
+                    return ;
+                }
+            }
+            else if(p_type == "boolean"){
+                alert('boolean类型不需要编辑');
+                return ;
+            }
+            else if(p_type == "String"){
+                tmp_enum_list.push(item2num);
+            }
+
+            render_item_list();
+        }
+
+        function render_item_list(){
+            str = "";
+            for (i = 0; i < tmp_enum_list.length; ++i){
+                str += "<option>" + tmp_enum_list[i] + "</option>" + "\n";
+            }
+
+            $('#item_list').html(str);
+        }
     </script>
     <style type="text/css">
         .ztree li span.button.add {margin-left:2px; margin-right: -1px; background-position:-144px 0; vertical-align:top; *vertical-align:middle}
@@ -337,25 +398,47 @@
     </div>
     <div class="col-sm-7">
         <div>
-            <div><span id="node_name">节点名称</span></div>
-            <div>英文名称:<input onchange="update_en_name();" type="text" id="en_name" placeholder="英文名称" /></div>
+            <div><h4 id="node_name">节点名称</h4></div>
+            <br />
             <div>
-                <input id="property_type" list="property_type_input" placeholder="属性类型" />
-
-                <datalist id="property_type_input">
-                    <option>int</option>
-                    <option>float</option>
-                    <option>boolean</option>
-                    <option>String</option>
-                    <option>enum</option>
-                </datalist>
-
-                <input type="text" id="property_name" placeholder="属性名称" />
-
-                <button type="button" onclick="addNewProperty();">新建</button>
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="en_name_input">英文名称:</label>
+                    <input id="en_name_input" type="text" class="form-control" onchange="update_en_name();" type="text" id="en_name" placeholder="英文名称" />
+                </div>
+                <br />
+            </form>
             </div>
+            <br />
+            <div>
+                <form class="form-inline">
+                    <div class="form-group">
+                        <input id="property_type" type="text" class="form-control" list="property_type_input" placeholder="属性类型" />
+                        <datalist id="property_type_input">
+                            <option>int</option>
+                            <option>float</option>
+                            <option>boolean</option>
+                            <option>String</option>
+                        </datalist>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="property_name" placeholder="属性名称" />
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal">
+                            编辑
+                        </button>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-primary" onclick="addNewProperty();">新建</button>
+                    </div>
+                    <br />
+                </form>
+            </div>
+
         </div>
-        <table id="property_tbl" class="table table-striped table-bordered">
+        <br />
+        <table id="property_tbl" class="table table-striped table-bordered table-condensed">
 
         </table>
         <div><span onclick="$('#declare_area').toggle();">toggle</span></div>
@@ -363,6 +446,38 @@
             <pre id="declare_area">
 
             </pre>
+        </div>
+    </div>
+</div>
+
+
+<%--生成--%>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">编辑</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-inline">
+                    <div class="form-group">
+                        <%--<label for="enum_input">新建: </label>--%>
+                        <input id="enum_input" type="text" class="form-control" placeholder="" />
+                        <button type="button" class="btn btn-primary">
+                            新建
+                        </button>
+                    </div>
+                    <br />
+                </form>
+                <br />
+                <select multiple class="form-control" id="item_list">
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary">保存</button>
+            </div>
         </div>
     </div>
 </div>

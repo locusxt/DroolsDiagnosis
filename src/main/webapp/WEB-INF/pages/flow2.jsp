@@ -355,14 +355,20 @@
                 fromid = li["from"];
                 toid = li["to"];
                 cond = li["cond"];
+                docs = li["doc"];
+                if (docs != undefined && docs != "") docs = " [" + docs + "]";
+                else docs = "";
                 totext = "";
                 for (u = 0; u < nodes.length; ++u){no = nodes[u]; if(no["key"] == toid) totext = no["text"];}
+                if(totext == "End") continue;
                 str = "rule \"" + fromid + "->"+ toid + "\"\n";
                 str += "when\n";
-                str += "s: State(id == " + fromid + ")\n"
+                str += "s: State(id == " + fromid + ")\n";
+                str += "r: ReasonChain()\n";
                 str += cond + "\n";
                 str += "then\n";
                 str += "modify(s){id = " + toid + ", text = \"" + totext + "\"};\n";
+                str += "modify(r){text += \""+ li["text"] + "->" + totext + docs +"\\n\"};\n";
                 str += "end";
 //                console.log(str);
                 totalRules += str + "\n\n\/\/\n";
@@ -549,8 +555,8 @@
  ],
   "linkDataArray": [
 {"from":-1, "to":-2, "fromPort":"B", "toPort":"T", "points":[125.109375,-612.2266599078512,125.109375,-602.2266599078512,125.109375,-580.3010542581249,131.109375,-580.3010542581249,131.109375,-558.3754486083984,131.109375,-548.3754486083984], "cond":"Ache(position == \"venter superior\")", "text":"上腹痛"},
-{"from":-2, "to":-3, "fromPort":"L", "toPort":"T", "points":[46.46046447753906,-524,36.46046447753906,-524,-179.890625,-524,-179.890625,-471.1877243041992,-179.890625,-418.3754486083984,-179.890625,-408.3754486083984], "cond":"Ache(position == \"venter superior\", duration_ < 7)\nnot (Jaundice())\nnot (Fever())\nLFTs(state == \"Normal\")\nLipase(state == \"Normal\")", "text":"发作时间短，无黄疸、发热，LFTs、脂肪酶正常"},
-{"from":-3, "to":-4, "fromPort":"B", "toPort":"T", "points":[-179.890625,-359.6245513916015,-179.890625,-349.6245513916015,-179.890625,-311.53113784790037,-175.890625,-311.53113784790037,-175.890625,-273.4377243041992,-175.890625,-263.4377243041992], "cond":"UltrasonicInspection(result_ == \"positive\")", "text":"（阳性）"},
+{"from":-2, "to":-3, "fromPort":"L", "toPort":"T", "points":[46.46046447753906,-524,36.46046447753906,-524,-179.890625,-524,-179.890625,-471.1877243041992,-179.890625,-418.3754486083984,-179.890625,-408.3754486083984], "cond":"Ache(position == \"venter superior\", duration_ < 7)\nnot (Jaundice())\nnot (Fever())\nLFTs(state == \"Normal\")\nLipase(state == \"Normal\")", "text":"发作时间短，无黄疸、发热，LFTs、脂肪酶正常", "doc":"123"},
+{"from":-3, "to":-4, "fromPort":"B", "toPort":"T", "points":[-179.890625,-359.6245513916015,-179.890625,-349.6245513916015,-179.890625,-311.53113784790037,-175.890625,-311.53113784790037,-175.890625,-273.4377243041992,-175.890625,-263.4377243041992], "cond":"UltrasonicInspection(result_ == \"positive\")", "text":"（阳性）", "doc":"456"},
 {"from":-2, "to":-5, "fromPort":"B", "toPort":"T", "points":[131.109375,-499.6245513916015,131.109375,-489.6245513916015,131.109375,-454.5,138.109375,-454.5,138.109375,-419.3754486083984,138.109375,-409.3754486083984], "text":"持续性腹痛，可能出现发热，胆红素、LFTs、脂肪酶正常", "cond":"Ache(position == \"venter superior\", duration_ >= 7)\nLFTs(state == \"Normal\")\nLipase(state == \"Normal\")"},
 {"from":-5, "to":-6, "fromPort":"L", "toPort":"T", "points":[56.30943298339844,-385,46.30943298339844,-385,28.109375,-385,28.109375,-331.71886215209963,28.109375,-278.4377243041992,28.109375,-268.4377243041992], "text":"未确诊", "cond":"UltrasonicInspection(position==\"right upper quadrant\", result_==\"DU\")"},
 {"from":-5, "to":-7, "fromPort":"R", "toPort":"T", "points":[219.90931701660156,-385,229.90931701660156,-385,235.109375,-385,235.109375,-280.21886215209963,235.109375,-175.4377243041992,235.109375,-165.4377243041992], "text":"胆结石伴胆囊壁增厚或水肿", "cond":"UltrasonicInspection(position==\"right upper quadrant\", result_ ==\"gall stone\" )"},

@@ -48,7 +48,11 @@ public class TestController {
             Object sta = stateType.newInstance();
             stateType.set(sta, "id", -1);
             stateType.set(sta, "text", "None");
+            FactType reasonChainType = kbase.getFactType( "rules", "ReasonChain" );
+            Object rchain = reasonChainType.newInstance();
+            reasonChainType.set(rchain, "text", "Start\n");
             kSession.insert(sta);
+            kSession.insert(rchain);
 
 
             for (int i = 0; i < items.size(); ++i){
@@ -79,6 +83,8 @@ public class TestController {
             kSession.fireAllRules();
             System.out.println("end " + stateType.get(sta, "text"));
             res = "" +  stateType.get(sta, "text");
+//            res += "============Reasoning Chain==============\n";
+//            res += reasonChainType.get(rchain, "text") + "End";
         } catch (Throwable t) {
             t.printStackTrace();
         }

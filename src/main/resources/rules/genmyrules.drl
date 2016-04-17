@@ -76,18 +76,107 @@ declare State
     text : String
 end
 
+declare ReasonChain
+    text : String
+end
+//
+//rule "-1->-2"
+//when
+//s: State(id == -1)
+//Ache(position == "venter superior")
+//r: ReasonChain()
+//then
+//modify(s){id = -2, text = "需要体温、LFTs、胆红素、脂肪酶检查"};
+//modify(r){text += "上腹痛->需要体温、LFTs、胆红素、脂肪酶检查\n"};
+//end
+//
+////
+//rule "-2->-3"
+//when
+//s: State(id == -2)
+//Ache(position == "venter superior", duration_ < 7)
+//not (Jaundice())
+//not (Fever())
+//LFTs(state == "Normal")
+//Lipase(state == "Normal")
+//then
+//modify(s){id = -3, text = "考虑胆绞痛，需要右上腹超声进一步检查"};
+//end
+//
+////
+//rule "-3->-4"
+//when
+//s: State(id == -3)
+//UltrasonicInspection(result_ == "positive")
+//then
+//modify(s){id = -4, text = "结论：胆绞痛"};
+//end
+//
+////
+//rule "-2->-5"
+//when
+//s: State(id == -2)
+//Ache(position == "venter superior", duration_ >= 7)
+//LFTs(state == "Normal")
+//Lipase(state == "Normal")
+//then
+//modify(s){id = -5, text = "考虑胆囊炎，需要右上腹超声进一步检查"};
+//end
+//
+////
+//rule "-5->-6"
+//when
+//s: State(id == -5)
+//UltrasonicInspection(position=="right upper quadrant", result_=="DU")
+//then
+//modify(s){id = -6, text = "需要核医学胆道摄影"};
+//end
+//
+////
+//rule "-5->-7"
+//when
+//s: State(id == -5)
+//UltrasonicInspection(position=="right upper quadrant", result_ =="gall stone" )
+//then
+//modify(s){id = -7, text = "结论：胆囊炎"};
+//end
+//
+////
+//rule "-6->-7"
+//when
+//s: State(id == -6)
+//NuclearBiliaryPhotography(result_ == "absent of biliary tract sign")
+//then
+//modify(s){id = -7, text = "结论：胆囊炎"};
+//end
+//
+////
+//rule "-2->-8"
+//when
+//s: State(id == -2)
+//Ache(position == "venter superior", duration_ >= 7)
+//LFTs(state == "Up")
+//Lipase(state == "Up")
+//then
+//modify(s){id = -8, text = "考虑胆总管结石和反流性胆管炎，若脂肪酶升高考虑胰腺炎。考虑行US、EUS、MRCP或ERCP"};
+//end
+
+//
 rule "-1->-2"
 when
 s: State(id == -1)
+r: ReasonChain()
 Ache(position == "venter superior")
 then
 modify(s){id = -2, text = "需要体温、LFTs、胆红素、脂肪酶检查"};
+modify(r){text += "上腹痛->需要体温、LFTs、胆红素、脂肪酶检查\n"};
 end
 
 //
 rule "-2->-3"
 when
 s: State(id == -2)
+r: ReasonChain()
 Ache(position == "venter superior", duration_ < 7)
 not (Jaundice())
 not (Fever())
@@ -95,64 +184,77 @@ LFTs(state == "Normal")
 Lipase(state == "Normal")
 then
 modify(s){id = -3, text = "考虑胆绞痛，需要右上腹超声进一步检查"};
+modify(r){text += "发作时间短，无黄疸、发热，LFTs、脂肪酶正常->考虑胆绞痛，需要右上腹超声进一步检查[123]\n"};
 end
 
 //
 rule "-3->-4"
 when
 s: State(id == -3)
+r: ReasonChain()
 UltrasonicInspection(result_ == "positive")
 then
 modify(s){id = -4, text = "结论：胆绞痛"};
+modify(r){text += "（阳性）->结论：胆绞痛[456]\n"};
 end
 
 //
 rule "-2->-5"
 when
 s: State(id == -2)
+r: ReasonChain()
 Ache(position == "venter superior", duration_ >= 7)
 LFTs(state == "Normal")
 Lipase(state == "Normal")
 then
 modify(s){id = -5, text = "考虑胆囊炎，需要右上腹超声进一步检查"};
+modify(r){text += "持续性腹痛，可能出现发热，胆红素、LFTs、脂肪酶正常->考虑胆囊炎，需要右上腹超声进一步检查\n"};
 end
 
 //
 rule "-5->-6"
 when
 s: State(id == -5)
+r: ReasonChain()
 UltrasonicInspection(position=="right upper quadrant", result_=="DU")
 then
 modify(s){id = -6, text = "需要核医学胆道摄影"};
+modify(r){text += "未确诊->需要核医学胆道摄影\n"};
 end
 
 //
 rule "-5->-7"
 when
 s: State(id == -5)
+r: ReasonChain()
 UltrasonicInspection(position=="right upper quadrant", result_ =="gall stone" )
 then
 modify(s){id = -7, text = "结论：胆囊炎"};
+modify(r){text += "胆结石伴胆囊壁增厚或水肿->结论：胆囊炎\n"};
 end
 
 //
 rule "-6->-7"
 when
 s: State(id == -6)
-NuclearBiliaryPhotography(result_ == "absent of biliary tract sign")
+r: ReasonChain()
+NuclearBiliaryPhotography(result_ == "absent of  biliary tract sign")
 then
 modify(s){id = -7, text = "结论：胆囊炎"};
+modify(r){text += "胆道无显影->结论：胆囊炎\n"};
 end
 
 //
 rule "-2->-8"
 when
 s: State(id == -2)
+r: ReasonChain()
 Ache(position == "venter superior", duration_ >= 7)
 LFTs(state == "Up")
 Lipase(state == "Up")
 then
 modify(s){id = -8, text = "考虑胆总管结石和反流性胆管炎，若脂肪酶升高考虑胰腺炎。考虑行US、EUS、MRCP或ERCP"};
+modify(r){text += "持续性腹痛，可能出现发热，胆红素、脂肪酶或LFTs升高->考虑胆总管结石和反流性胆管炎，若脂肪酶升高考虑胰腺炎。考虑行US、EUS、MRCP或ERCP\n"};
 end
 
 //
