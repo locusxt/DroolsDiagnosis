@@ -99,7 +99,7 @@
         var curNodePid = -1;
         //id : {name:{type:t, enum:[]}}
         var nodeProperty =
-        {"2":{},"3":{"id":"int","text":"String"},"112":{},"113":{},"114":{},"115":{},"116":{},"117":{},"118":{"duration_":"int","have_cough":"boolean"},"119":{},"120":{},"151":{"position":"String","duration_":"int"},"152":{},"153":{},"154":{"state":"String"},"155":{"state":"String"},"156":{"state":"String"},"157":{},"158":{},"159":{},"160":{},"161":{"result_":"String", "position":"String"},"162":{},"163":{"result_":"String"}};
+        {"2":{},"3":{"id":{"type":"int"},"text":{"type":"String"}},"112":{},"113":{},"114":{},"115":{},"116":{},"117":{},"118":{"duration_":{"type":"int"},"have_cough":{"type":"boolean"}},"119":{},"120":{},"151":{"position":{"type":"String"},"duration_":{"type":"int"}},"152":{},"153":{},"154":{"state":{"type":"String"}},"155":{"state":{"type":"String"}},"156":{"state":{"type":"String"}},"157":{},"158":{},"159":{},"160":{},"161":{"result_":{"type":"String"}, "position":{"type":"String"}},"162":{},"163":{"result_":{"type":"String"}}};
         function requestNewId(){
             curMax += 1;
             return curMax;
@@ -169,7 +169,7 @@
                             return false;
                     if (!(n["id"] in nodeProperty)) {nodeProperty[n["id"]] = {};}
 //                    if (!(n["id"] in nodeName)) {nodeName[n["id"]] = {};}
-                    nodeProperty[n["id"]][$("#property_name").val()] = $("#property_type").val();
+                    nodeProperty[n["id"]][$("#property_name").val()] = {"type" : $("#property_type").val()};
 //                    treeObj.updateNode(n);
                 }
             }
@@ -196,7 +196,7 @@
             str = "";
             if ((curNodeId in nodeProperty)){
                 for (p in nodeProperty[curNodeId]){
-                    str += "<tr><td>" + nodeProperty[curNodeId][p] + "</td> <td>" + p +
+                    str += "<tr><td>" + nodeProperty[curNodeId][p]["type"] + "</td> <td>" + p +
                                     "</td> <td><button type='button' class='btn btn-primary' onclick=\"delProperty('" + p + "')\">删除</button></td></tr>";
                 }
             }
@@ -230,7 +230,7 @@
                     if (targetPName != "root" && targetPName != "other") str += " extends " + targetPName;
                     str += "\n";
                     for (p in nodeProperty[targetId]) {
-                        str += "    " + p + " : " + nodeProperty[targetId][p] + "\n";
+                        str += "    " + p + " : " + nodeProperty[targetId][p]["type"] + "\n";
                     }
                     str += "end\n";
                 }
@@ -328,6 +328,8 @@
         }
 
         tmp_enum_list = [];
+        p_type = "";
+        p_name = "";
         function add_enum_item(){
             item_content = $('#enum_input').val();
             if (item_content == ""){
@@ -335,8 +337,9 @@
                 return ;
             }
 
-            p_type = $('#property_type').val();
-            p_name = $('#property_name').val();
+//            p_type = $('#property_type').val();
+//            p_name = $('#property_name').val();
+
             if (p_type == "int"){
                 item2num = parseInt(item_content);
                 if (!isNaN(item2num)){
@@ -413,7 +416,7 @@
             <div>
                 <form class="form-inline">
                     <div class="form-group">
-                        <input id="property_type" type="text" class="form-control" list="property_type_input" placeholder="属性类型" />
+                        <input id="property_type" type="text" class="form-control" list="property_type_input" placeholder="属性类型" onchange="p_type=$('#property_type').val();"/>
                         <datalist id="property_type_input">
                             <option>int</option>
                             <option>float</option>
@@ -422,7 +425,7 @@
                         </datalist>
                     </div>
                     <div class="form-group">
-                        <input type="text" class="form-control" id="property_name" placeholder="属性名称" />
+                        <input type="text" class="form-control" id="property_name" placeholder="属性名称" onchange="p_name=$('#property_name').val();"/>
                     </div>
                     <div class="form-group">
                         <button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal">
@@ -464,7 +467,7 @@
                     <div class="form-group">
                         <%--<label for="enum_input">新建: </label>--%>
                         <input id="enum_input" type="text" class="form-control" placeholder="" />
-                        <button type="button" class="btn btn-primary">
+                        <button type="button" class="btn btn-primary" onclick="add_enum_item();">
                             新建
                         </button>
                     </div>
