@@ -197,7 +197,11 @@
             if ((curNodeId in nodeProperty)){
                 for (p in nodeProperty[curNodeId]){
                     str += "<tr><td>" + nodeProperty[curNodeId][p]["type"] + "</td> <td>" + p +
-                                    "</td> <td><button type='button' class='btn btn-primary' onclick=\"delProperty('" + p + "')\">删除</button></td></tr>";
+                                    "</td> <td><a href='' title='编辑' onclick='p_type=\"" + nodeProperty[curNodeId][p]["type"] + "\"; p_name=\"" + p + "\";p_mode = \"mod\";load_item_list();return false;' data-toggle='modal' data-target='#myModal'>" +
+                                        "<span class='glyphicon glyphicon-pencil' aria-hidden='true'></span></a> &nbsp;&nbsp;"+
+//                                    "</td> <td><button type='button' class='btn btn-info'> 编辑 </button> &nbsp;&nbsp;"+
+//                                    "<button type='button' class='btn btn-primary' onclick=\"delProperty('" + p + "')\">删除</button></td></tr>";
+                                    "<a href='' title='删除' onclick=\"delProperty('" + p + "');return false;\"><span class='glyphicon glyphicon-remove' aria-hidden='true'></a></td></tr>";
                 }
             }
             console.log(str);
@@ -330,15 +334,13 @@
         tmp_enum_list = [];
         p_type = "";
         p_name = "";
+        p_mode = "add";
         function add_enum_item(){
             item_content = $('#enum_input').val();
             if (item_content == ""){
                 alert('缺少内容');
                 return ;
             }
-
-//            p_type = $('#property_type').val();
-//            p_name = $('#property_name').val();
 
             if (p_type == "int"){
                 item2num = parseInt(item_content);
@@ -371,7 +373,15 @@
             else if(p_type == "String"){
                 tmp_enum_list.push(item2num);
             }
+            $('#enum_input').val('');
+            render_item_list();
+        }
 
+        function load_item_list(){
+            if (p_mode == "mod"){
+                tmp_enum_list = nodeProperty[curNodeId][p_name]["enum"];
+                if (tmp_enum_list == undefined) tmp_enum_list = [];
+            }
             render_item_list();
         }
 
@@ -382,6 +392,12 @@
             }
 
             $('#item_list').html(str);
+        }
+
+        function save_enum_item(){
+            if (p_mode == "mod"){
+                nodeProperty[curNodeId][p_name]["enum"] = tmp_enum_list;
+            }
         }
     </script>
     <style type="text/css">
@@ -428,7 +444,7 @@
                         <input type="text" class="form-control" id="property_name" placeholder="属性名称" onchange="p_name=$('#property_name').val();"/>
                     </div>
                     <div class="form-group">
-                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal">
+                        <button type="button" class="btn btn-info" onclick="p_mode='add'; load_item_list();" data-toggle="modal" data-target="#myModal">
                             编辑
                         </button>
                     </div>
@@ -479,7 +495,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                <button type="button" class="btn btn-primary">保存</button>
+                <button type="button" class="btn btn-primary" onclick="save_enum_item();">保存</button>
             </div>
         </div>
     </div>
