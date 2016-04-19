@@ -137,7 +137,7 @@
             $('#node_name').html(treeNode.id + ", " + treeNode.name);
             if (!(curNodeId in nodeProperty)) nodeProperty[curNodeId] = {};
             if (!(curNodeId in nodeName)) {nodeName[curNodeId] = {"en":""};}
-            $("#en_name").val(nodeName[curNodeId]["en"]);
+            $("#en_name_input").val(nodeName[curNodeId]["en"]);
 
             updatePropertyTable();
         };
@@ -167,14 +167,19 @@
                 if (n["id"] == curNodeId && $("#property_name").val() != "" && $("#property_type").val() != ""){
                     if (dectectType($("#property_type").val()) == false)
                             return false;
+                    if ($("#property_type").val() != "boolean" && tmp_enum_list_add.length == 0){
+                        alert("没有进行详细编辑");
+                        return false;
+                    }
                     if (!(n["id"] in nodeProperty)) {nodeProperty[n["id"]] = {};}
 //                    if (!(n["id"] in nodeName)) {nodeName[n["id"]] = {};}
-                    nodeProperty[n["id"]][$("#property_name").val()] = {"type" : $("#property_type").val()};
+                    nodeProperty[n["id"]][$("#property_name").val()] = {"type" : $("#property_type").val(), "enum":tmp_enum_list_add};
 //                    treeObj.updateNode(n);
                 }
             }
             $("#property_name").val('');
             $("#property_type").val('');
+            tmp_enum_list_add = [];
             updatePropertyTable();
         };
 
@@ -332,11 +337,17 @@
         }
 
         tmp_enum_list = [];
+        tmp_enum_list_add = [];
         p_type = "";
         p_name = "";
         p_mode = "add";
         function add_enum_item(){
             item_content = $('#enum_input').val();
+            if (p_mode == "add")
+                t_list = tmp_enum_list_add;
+            else if (p_mode == "mod")
+                t_list = tmp_enum_list;
+
             if (item_content == ""){
                 alert('缺少内容');
                 return ;
@@ -345,9 +356,9 @@
             if (p_type == "int"){
                 item2num = parseInt(item_content);
                 if (!isNaN(item2num)){
-                    if (tmp_enum_list.indexOf(item2num) != -1){alert('已存在');return ;}
-                    tmp_enum_list.push(item2num);
-                    tmp_enum_list.sort();
+                    if (t_list.indexOf(item2num) != -1){alert('已存在');return ;}
+                    t_list.push(item2num);
+                    t_list.sort();
                 }
                 else{
                     alert('输入内容不是int类型');
@@ -357,9 +368,9 @@
             else if (p_type == "float"){
                 item2num = parseFloat(item_content);
                 if (!isNaN(item2num)){
-                    if (tmp_enum_list.indexOf(item2num) != -1){alert('已存在');return ;}
-                    tmp_enum_list.push(item2num);
-                    tmp_enum_list.sort();
+                    if (t_list.indexOf(item2num) != -1){alert('已存在');return ;}
+                    t_list.push(item2num);
+                    t_list.sort();
                 }
                 else{
                     alert('输入内容不是float类型');
@@ -371,32 +382,46 @@
                 return ;
             }
             else if(p_type == "String"){
-                tmp_enum_list.push(item2num);
+                t_list.push(item_content);
             }
+            if (p_mode == "add")
+                tmp_enum_list_add = t_list;
+            else if (p_mode == "mod")
+                tmp_enum_list = t_list;
             $('#enum_input').val('');
             render_item_list();
         }
 
         function load_item_list(){
+
             if (p_mode == "mod"){
                 tmp_enum_list = nodeProperty[curNodeId][p_name]["enum"];
                 if (tmp_enum_list == undefined) tmp_enum_list = [];
             }
+
             render_item_list();
         }
 
         function render_item_list(){
+            if (p_mode == "add")
+                t_list = tmp_enum_list_add;
+            else if (p_mode == "mod")
+                t_list = tmp_enum_list;
             str = "";
-            for (i = 0; i < tmp_enum_list.length; ++i){
-                str += "<option>" + tmp_enum_list[i] + "</option>" + "\n";
+            for (i = 0; i < t_list.length; ++i){
+                str += "<option>" + t_list[i] + "</option>" + "\n";
             }
 
             $('#item_list').html(str);
         }
 
         function save_enum_item(){
+            if (p_mode == "add")
+                t_list = tmp_enum_list_add;
+            else if (p_mode == "mod")
+                t_list = tmp_enum_list;
             if (p_mode == "mod"){
-                nodeProperty[curNodeId][p_name]["enum"] = tmp_enum_list;
+                nodeProperty[curNodeId][p_name]["enum"] = t_list;
             }
         }
     </script>
