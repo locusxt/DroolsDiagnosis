@@ -99,7 +99,8 @@
         var curNodePid = -1;
         //id : {name:{type:t, enum:[]}}
         var nodeProperty =
-        {"2":{},"3":{"id":{"type":"int"},"text":{"type":"String"}},"112":{},"113":{},"114":{},"115":{},"116":{},"117":{},"118":{"duration_":{"type":"int"},"have_cough":{"type":"boolean"}},"119":{},"120":{},"151":{"position":{"type":"String"},"duration_":{"type":"int"}},"152":{},"153":{},"154":{"state":{"type":"String"}},"155":{"state":{"type":"String"}},"156":{"state":{"type":"String"}},"157":{},"158":{},"159":{},"160":{},"161":{"result_":{"type":"String"}, "position":{"type":"String"}},"162":{},"163":{"result_":{"type":"String"}}};
+        {"2":{},"3":{"id":{"type":"int"},"text":{"type":"String"}},"112":{},"113":{},"114":{},"115":{},"116":{},"117":{},"118":{"duration_":{"type":"int","enum":[11,13]},"have_cough":{"type":"boolean"}},"119":{},"120":{},"151":{"position":{"type":"String","enum":["venter superior"]},"duration_":{"type":"int","enum":[7]}},"152":{"has":{"type":"boolean","enum":[]}},"153":{"has":{"type":"boolean","enum":[]}},"154":{"state":{"type":"String","enum":["Normal","Up"]}},"155":{"state":{"type":"String"}},"156":{"state":{"type":"String","enum":["Normal","Up"]}},"157":{},"158":{},"159":{},"160":{},"161":{"result_":{"type":"String","enum":["positive","negative","DU","gall stone"]},"position":{"type":"String","enum":["right upper quadrant"]}},"162":{},"163":{"result_":{"type":"String","enum":["absent of  biliary tract sign","Normal"]}}};
+//        {"2":{},"3":{"id":{"type":"int"},"text":{"type":"String"}},"112":{},"113":{},"114":{},"115":{},"116":{},"117":{},"118":{"duration_":{"type":"int"},"have_cough":{"type":"boolean"}},"119":{},"120":{},"151":{"position":{"type":"String"},"duration_":{"type":"int"}},"152":{},"153":{},"154":{"state":{"type":"String"}},"155":{"state":{"type":"String"}},"156":{"state":{"type":"String"}},"157":{},"158":{},"159":{},"160":{},"161":{"result_":{"type":"String"}, "position":{"type":"String"}},"162":{},"163":{"result_":{"type":"String"}}};
         function requestNewId(){
             curMax += 1;
             return curMax;
@@ -358,7 +359,7 @@
                 if (!isNaN(item2num)){
                     if (t_list.indexOf(item2num) != -1){alert('已存在');return ;}
                     t_list.push(item2num);
-                    t_list.sort();
+                    t_list.sort(function(a,b){return a>b?1:-1});
                 }
                 else{
                     alert('输入内容不是int类型');
@@ -370,7 +371,7 @@
                 if (!isNaN(item2num)){
                     if (t_list.indexOf(item2num) != -1){alert('已存在');return ;}
                     t_list.push(item2num);
-                    t_list.sort();
+                    t_list.sort(function(a,b){return a>b?1:-1});
                 }
                 else{
                     alert('输入内容不是float类型');
