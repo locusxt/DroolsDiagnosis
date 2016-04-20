@@ -233,6 +233,8 @@
                                 { category: "Comment", text: "Comment" }
                             ])
                         });
+
+            gen_options_list();
         }
         // Make all ports on a node visible when the mouse is over the node
         function showPorts(node, show) {
@@ -274,7 +276,7 @@
             var part = e.diagram.selection.first();
 //            console.log(part.data);
             if (part instanceof go.Link){
-                console.log("sss");
+//                console.log("sss");
                 updateProperties(part.data, "link");
             }
             else if(part instanceof go.Node){
@@ -286,7 +288,8 @@
         }
 
         function updateProperties(data, ptype) {
-            console.log(data);
+//            console.log(data);
+
             if (ptype == "link"){
                 $('#linkProperty').show();
                 $('#nodeProperty').hide();
@@ -299,6 +302,18 @@
                 $('#nodeProperty').show();
                 $('#nodeText').val(data.text || "");
                 $('#nodeCmt').val(data.cmt || "");
+                var chosed = myDiagram.selection.first();
+                // maxSelectionCount = 1, so there can only be one Part in this collection
+                var data2 = chosed.data;
+                if((chosed instanceof go.Node) && data2 != null){
+                    node_key = data2["key"];
+                    if (node_require[node_key] != undefined) {
+                        tid = node_require[node_key][0];
+                        $('#chosed').val(nodeName[tid]["cn"] + "(" + tid + ")" || "");
+                    }
+                    else
+                        $('#chosed').val("");
+                }
             }
             else{
                 $('#linkProperty').hide();
@@ -309,17 +324,7 @@
                 $('#nodeText').val("");
                 $('#nodeCmt').val("");
             }
-//            if (data === null) {
-//                document.getElementById("propertiesPanel").style.display = "none";
-//                document.getElementById("advice").value = "";
-//                document.getElementById("relatedDoc").value = "";
-//                document.getElementById("comments").value = "";
-//            } else {
-//                document.getElementById("propertiesPanel").style.display = "block";
-//                document.getElementById("advice").value = data.advice || "";
-//                document.getElementById("relatedDoc").value = data.relatedDoc || "";
-//                document.getElementById("comments").value = data.comments || "";
-//            }
+
         }
 
         function updateData(text, field) {
@@ -487,6 +492,61 @@
 
         }
 
+        function get_choose(){
+            var chosed = myDiagram.selection.first();
+            // maxSelectionCount = 1, so there can only be one Part in this collection
+            var data = chosed.data;
+            if((chosed instanceof go.Node) && data != null){
+                console.log(data["key"]);
+            }
+            else if ((chosed instanceof  go.Link) && data != null){
+                console.log(data["from"]);
+                console.log(data["to"]);
+            }
+        }
+
+        var node_require = {};
+
+        //remove in the future
+        var nodeName =
+        {"0":{"en":""},"1":{"en":"root","cn":"root"},"2":{"en":"other","cn":"其他"},"3":{"en":"State","cn":"State"},
+            "112":{"en":"Disease","cn":"疾病"},"113":{"en":"Symptom","cn":"症状"},"114":{"en":"Medicine","cn":"药物"},
+            "115":{"en":"Examination","cn":"检查"},"116":{"en":"Respiratory","cn":"呼吸道"},
+            "117":{"en":"UpperRespiratory","cn":"上呼吸道"},"118":{"en":"CommonCold","cn":"普通感冒"},
+            "119":{"en":"Pharyngitis","cn":"咽炎"},"120":{"en":"Pneumonia","cn":"肺炎"},"151":{"en":"Ache","cn":"疼痛"},
+            "152":{"en":"Jaundice","cn":"黄疸"},"153":{"en":"Fever","cn":"发烧"},"154":{"en":"LFTs","cn":"LFTs"},
+            "155":{"en":"Bilirubin","cn":"胆红素检查"},"156":{"en":"Lipase","cn":"脂肪酶检查"},"157":{"en":"Bravery","cn":"胆"},
+            "158":{"en":"Cholecystalgia","cn":"胆绞痛"},"159":{"en":"Cholecystitis","cn":"胆囊炎"},
+            "161":{"en":"UltrasonicInspection","cn":"超声波检查"},"163":{"en":"NuclearBiliaryPhotography","cn":"核医学检查"}};
+
+        var nodeProperty =
+        {"2":{},"3":{"id":{"type":"int"},"text":{"type":"String"}},"112":{},"113":{},"114":{},"115":{},"116":{},"117":{},"118":{"duration_":{"type":"int","enum":[11,13]},"have_cough":{"type":"boolean"}},"119":{},"120":{},"151":{"position":{"type":"String","enum":["venter superior"]},"duration_":{"type":"int","enum":[7]}},"152":{"has":{"type":"boolean","enum":[]}},"153":{"has":{"type":"boolean","enum":[]}},"154":{"state":{"type":"String","enum":["Normal","Up"]}},"155":{"state":{"type":"String"}},"156":{"state":{"type":"String","enum":["Normal","Up"]}},"157":{},"158":{},"159":{},"160":{},"161":{"result_":{"type":"String","enum":["positive","negative","DU","gall stone"]},"position":{"type":"String","enum":["right upper quadrant"]}},"162":{},"163":{"result_":{"type":"String","enum":["absent of  biliary tract sign","Normal"]}}};
+
+        function gen_options_list(){
+            str = "";
+            for (k in nodeName){
+                str += "<option>" + nodeName[k]["cn"] + "(" + k + ")</option>" + "\n";
+            }
+            $('#chosed_input').html(str);
+        }
+
+        function get_tid(){
+            test = $('#chosed').val();
+            if (test == "" || test.indexOf("(") == -1 || test.indexOf(")") == -1) return -1;
+            return test.substring(test.indexOf("(")+1, test.indexOf(")"));
+        }
+
+        function update_require(){
+            var node_key = undefined;
+            var chosed = myDiagram.selection.first();
+            // maxSelectionCount = 1, so there can only be one Part in this collection
+            var data = chosed.data;
+            if((chosed instanceof go.Node) && data != null){
+                node_key = data["key"];
+            }
+            tid = get_tid();
+            if (tid != -1) node_require[node_key] = [tid];
+        }
     </script>
 
 </head>
@@ -519,15 +579,26 @@
     <%--</p>--%>
     <div>
         <div id="nodeProperty" style="display: none; background-color: aliceblue; border: solid 1px black">
-            <b>Node Properties</b><br />
-            Text: <input type="text" id="nodeText" style="width:50%" value="" onchange="updateData(this.value, 'text')" /><br />
-            Comment: <input type="text" id="nodeCmt" style="width:50%" value="" onchange="updateData(this.value, 'cmt')" /><br />
+            <b>节点属性</b><br />
+
+            <div>
+                <form class="form-inline" action="javascript:void(0);">
+                    <div class="form-group" onchange="update_require();">
+                        <input id="chosed" type="text" class="form-control" list="chosed_input" placeholder="需要检查的项目" onchange=""/>
+                        <datalist id="chosed_input">
+
+                        </datalist>
+                    </div>
+                </form>
+            </div>
+            文本: <input type="text" id="nodeText" style="width:50%" value="" onchange="updateData(this.value, 'text')" /><br />
+            注释: <input type="text" id="nodeCmt" style="width:50%" value="" onchange="updateData(this.value, 'cmt')" /><br />
         </div>
         <div id="linkProperty" style="display: none; background-color: aliceblue; border: solid 1px black">
-            <b>Link Properties</b><br />
-            Text: <input type="text" id="linkText" style="width:50%" value="" onchange="updateData(this.value, 'text')" /><br />
-            Condition: <textarea type="text" id="linkCond" style="width:50%" value="" onchange="updateData(this.value, 'cond')"></textarea><br />
-            Related Docs: <input type="text" id="linkDoc" style="width:50%" value="" onchange="updateData(this.value, 'doc')" /><br />
+            <b>边属性</b><br />
+            文本: <input type="text" id="linkText" style="width:50%" value="" onchange="updateData(this.value, 'text')" /><br />
+            条件: <textarea type="text" id="linkCond" style="width:50%" value="" onchange="updateData(this.value, 'cond')"></textarea><br />
+            相关文档: <input type="text" id="linkDoc" style="width:50%" value="" onchange="updateData(this.value, 'doc')" /><br />
 
         </div>
     </div>
