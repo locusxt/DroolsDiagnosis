@@ -296,6 +296,15 @@
                 $('#linkText').val(data.text || "");
                 $('#linkCond').val(data.cond || "");
                 $('#linkDoc').val(data.doc || "");
+                var chosed = myDiagram.selection.first();
+                // maxSelectionCount = 1, so there can only be one Part in this collection
+                var data2 = chosed.data;
+
+                if ((chosed instanceof  go.Link) && data2 != null){
+                    from_node = data2["from"];
+                    tid = node_require[from_node][0];
+                    gen_ul_conds(tid);
+                }
             }
             else if (ptype == "node"){
                 $('#linkProperty').hide();
@@ -547,6 +556,61 @@
             tid = get_tid();
             if (tid != -1) node_require[node_key] = [tid];
         }
+
+        function gen_total_possibility(kid){
+            p = nodeProperty[kid];
+            tmp_p = p;
+
+            cnt = 0;
+            for (k in p){
+                cnt += 1;
+                if (p[k]["type"] == "boolean") tmp_p[k]["div"] = [k + "==true", k + "==false"];
+                if (p[k]["type"] == "int" || p[k]["type"] == "float"){
+                    tmp_p[k]["div"] = [];
+                    if (p[k]["enum"] != undefined) {
+                        for (t = 0; t < p[k]["enum"].length; ++t) {
+                            if (t == 0)
+                                tmp_p[k]["div"].push(k + "<" + p[k]["enum"][0]);
+                            else
+                                tmp_p[k]["div"].push(p[k]["enum"][t - 1] + "<=" + k + "&&" + k + "<" + p[k]["enum"][t]);
+                            if (t == p[k]["enum"].length - 1)
+                                tmp_p[k]["div"].push(p[k]["enum"][t] + "<=" + k);
+                        }
+                    }
+                    else
+                        cnt -= 1;
+
+                }
+                if (p[k]["type"] == "String")
+                    tmp_p[k]["div"] = tmp_p[k]["enum"];
+            }
+
+            res = [];
+            for (k in tmp_p){
+                if(tmp_p[k]["div"] == undefined) continue;
+                if (res.length == 0)
+                    res = tmp_p[k]["div"];
+                else{
+                    new_res = [];
+                    for (r in res){
+                        for (e in tmp_p[k]["div"]){
+                            new_res.push(res[r] + " 且 " + tmp_p[k]["div"][e]);
+                        }
+                    }
+                    res = new_res;
+                }
+            }
+            return res;
+        }
+
+        function gen_ul_conds(from_id){
+            res = gen_total_possibility(from_id);
+            str = "";
+            for (k in res){
+                str += "<li>" + res[k] + "</li>";
+            }
+            $('#ul_cond').html(str);
+        }
     </script>
 
 </head>
@@ -584,21 +648,66 @@
             <div>
                 <form class="form-inline" action="javascript:void(0);">
                     <div class="form-group" onchange="update_require();">
+                        <label for="chosed">需要:</label>
                         <input id="chosed" type="text" class="form-control" list="chosed_input" placeholder="需要检查的项目" onchange=""/>
                         <datalist id="chosed_input">
 
                         </datalist>
                     </div>
                 </form>
+                <br />
+                <form class="form-inline" action="javascript:void(0);">
+                    <div class="form-group" >
+                        <label for="nodeText">文本:</label>
+                        <input type="text" id="nodeText" class="form-control" value="" onchange="updateData(this.value, 'text')" />
+                    </div>
+                </form>
+                <br />
+                <form class="form-inline" action="javascript:void(0);">
+                    <div class="form-group" >
+                        <label for="nodeCmt">注释:</label>
+                        <input type="text" id="nodeCmt" class="form-control" value="" onchange="updateData(this.value, 'cmt')" />                    </div>
+                </form>
+                <br />
             </div>
-            文本: <input type="text" id="nodeText" style="width:50%" value="" onchange="updateData(this.value, 'text')" /><br />
-            注释: <input type="text" id="nodeCmt" style="width:50%" value="" onchange="updateData(this.value, 'cmt')" /><br />
+            <%--文本: <input type="text" id="nodeText" style="width:50%" value="" onchange="updateData(this.value, 'text')" /><br />--%>
+            <%--注释: <input type="text" id="nodeCmt" style="width:50%" value="" onchange="updateData(this.value, 'cmt')" /><br />--%>
         </div>
         <div id="linkProperty" style="display: none; background-color: aliceblue; border: solid 1px black">
             <b>边属性</b><br />
-            文本: <input type="text" id="linkText" style="width:50%" value="" onchange="updateData(this.value, 'text')" /><br />
-            条件: <textarea type="text" id="linkCond" style="width:50%" value="" onchange="updateData(this.value, 'cond')"></textarea><br />
-            相关文档: <input type="text" id="linkDoc" style="width:50%" value="" onchange="updateData(this.value, 'doc')" /><br />
+            <div>
+                <div>
+                    <ul id="ul_cond">
+
+                    </ul>
+                </div>
+                <form class="form-inline" action="javascript:void(0);">
+                    <div class="form-group" >
+                        <label for="linkText">文本:</label>
+                        <input type="text" id="linkText" class="form-control" value="" onchange="updateData(this.value, 'text')" />
+                    </div>
+                </form>
+                <br />
+                <%--<form class="form-inline" action="javascript:void(0);">--%>
+                    <%--<div class="form-group" >--%>
+                        <%--<label for="linkCond">条件:</label>--%>
+                        <%--<input type="text" id="linkCond" class="form-control" value="" onchange="updateData(this.value, 'cond')" />--%>
+                    <%--</div>--%>
+                <%--</form>--%>
+                条件: <textarea type="text" id="linkCond" style="width:50%" value="" onchange="updateData(this.value, 'cond')"></textarea><br />
+
+                <br />
+                <form class="form-inline" action="javascript:void(0);">
+                    <div class="form-group" >
+                        <label for="linkDoc">文档:</label>
+                        <input type="text" id="linkDoc" class="form-control" value="" onchange="updateData(this.value, 'doc')" />
+                    </div>
+                </form>
+                <br />
+            </div>
+            <%--文本: <input type="text" id="linkText" style="width:50%" value="" onchange="updateData(this.value, 'text')" /><br />--%>
+            <%--条件: <textarea type="text" id="linkCond" style="width:50%" value="" onchange="updateData(this.value, 'cond')"></textarea><br />--%>
+            <%--文档: <input type="text" id="linkDoc" style="width:50%" value="" onchange="updateData(this.value, 'doc')" /><br />--%>
 
         </div>
     </div>
