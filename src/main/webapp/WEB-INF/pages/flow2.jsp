@@ -569,6 +569,24 @@
             }
         }
 
+        function gen_cond(from_id, to_id){
+            is_find = false;
+            rid = node_require[from_id][0];
+            rname = nodeName[rid]["en"];
+            str = rname + "(";
+            for (k in node_possibility_map[from_id]){
+                if (node_possibility_map[from_id][k] == to_id){
+                    is_find = true;
+                    str +=  "(" + k + ") || ";
+                }
+            }
+            str = str.substring(0,str.length-4);
+            str += ")";
+//            console.log(str);
+            if (is_find == false) str = "";
+            $('#linkCond').val(str);
+        }
+
         function gen_total_possibility(kid){
             p = nodeProperty[kid];
             tmp_p = p;
@@ -584,7 +602,7 @@
                             if (t == 0)
                                 tmp_p[k]["div"].push(k + "<" + p[k]["enum"][0]);
                             else
-                                tmp_p[k]["div"].push(p[k]["enum"][t - 1] + "<=" + k + "&&" + k + "<" + p[k]["enum"][t]);
+                                tmp_p[k]["div"].push(k + ">=" + p[k]["enum"][t - 1] + " && " + k + "<" + p[k]["enum"][t]);
                             if (t == p[k]["enum"].length - 1)
                                 tmp_p[k]["div"].push(p[k]["enum"][t] + "<=" + k);
                         }
@@ -606,7 +624,7 @@
                     new_res = [];
                     for (r in res){
                         for (e in tmp_p[k]["div"]){
-                            new_res.push(res[r] + " , " + tmp_p[k]["div"][e]);
+                            new_res.push(res[r] + " && " + tmp_p[k]["div"][e]);
                         }
                     }
                     res = new_res;
@@ -627,6 +645,7 @@
             else{
                 node_possibility_map[from_id][cond] = "unoccupied";
             }
+            gen_cond(from_id, to_id);
         }
 
         function gen_ul_conds(rid, from_id, to_id){
