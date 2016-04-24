@@ -302,8 +302,14 @@
 
                 if ((chosed instanceof  go.Link) && data2 != null){
                     from_node = data2["from"];
-                    tid = node_require[from_node][0];
-                    gen_ul_conds(tid);
+                    to_node = data2["to"];
+                    if(node_require[from_node] != undefined) {
+                        tid = node_require[from_node][0];
+                        gen_ul_conds(tid, from_node, to_node);
+                    }
+                    else{
+                        $('#ul_cond').html('');
+                    }
                 }
             }
             else if (ptype == "node"){
@@ -545,6 +551,7 @@
             return test.substring(test.indexOf("(")+1, test.indexOf(")"));
         }
 
+        node_possibility_map = {};
         function update_require(){
             var node_key = undefined;
             var chosed = myDiagram.selection.first();
@@ -555,6 +562,11 @@
             }
             tid = get_tid();
             if (tid != -1) node_require[node_key] = [tid];
+            total_possibility_list = gen_total_possibility(tid);
+            node_possibility_map[node_key] = {};
+            for (k in total_possibility_list){
+                node_possibility_map[node_key][total_possibility_list[k]] = "unoccupied";
+            }
         }
 
         function gen_total_possibility(kid){
@@ -594,7 +606,7 @@
                     new_res = [];
                     for (r in res){
                         for (e in tmp_p[k]["div"]){
-                            new_res.push(res[r] + " 且 " + tmp_p[k]["div"][e]);
+                            new_res.push(res[r] + " , " + tmp_p[k]["div"][e]);
                         }
                     }
                     res = new_res;
@@ -603,11 +615,35 @@
             return res;
         }
 
-        function gen_ul_conds(from_id){
-            res = gen_total_possibility(from_id);
+
+        function update_cond_checkbox(chb, from_id, to_id){
+            cond = $(chb).next().text();
+            console.log(1);
+            console.log(chb);
+            if ($(chb).prop('checked') == true){
+                console.log(2);
+                node_possibility_map[from_id][cond] = to_id;
+            }
+            else{
+                node_possibility_map[from_id][cond] = "unoccupied";
+            }
+        }
+
+        function gen_ul_conds(rid, from_id, to_id){
+            res = gen_total_possibility(rid);
             str = "";
             for (k in res){
-                str += "<li>" + res[k] + "</li>";
+                str += "<div class='checkbox'><label>";
+                if (node_possibility_map[from_id][res[k]] != "unoccupied" && node_possibility_map[from_id][res[k]] != to_id){
+                    str += "<input type='checkbox' disabled='true'>" + "<span>" + res[k] + "</span>";
+                }
+                else if(node_possibility_map[from_id][res[k]] == "unoccupied"){
+                    str += "<input type='checkbox' onchange='update_cond_checkbox(this," + from_id + ", " + to_id + ");'>" + "<span>" + res[k] + "</span>";
+                }
+                else if(node_possibility_map[from_id][res[k]] == to_id){
+                    str += "<input type='checkbox' checked='checked' onchange='update_cond_checkbox(this," + from_id + ", " + to_id + ");'>" + "<span>" + res[k] + "</span>";
+                }
+                str += "</label></div>";
             }
             $('#ul_cond').html(str);
         }
